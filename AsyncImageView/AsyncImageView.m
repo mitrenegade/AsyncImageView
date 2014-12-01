@@ -584,7 +584,7 @@ NSString *const AsyncImageErrorKey = @"error";
 
 - (void)setImageURL:(NSURL *)imageURL
 {
-    [[AsyncImageLoader sharedLoader] loadImageWithURL:imageURL target:self action:@selector(setImage:)];
+    [[AsyncImageLoader sharedLoader] loadImageWithURL:imageURL target:self action:@selector(setImage:forURL:)];
 }
 
 - (NSURL *)imageURL
@@ -638,14 +638,14 @@ NSString *const AsyncImageErrorKey = @"error";
 
 - (void)setImageURL:(NSURL *)imageURL
 {
+    super.imageURL = imageURL;
+    self.currentImageURL = imageURL;
     UIImage *image = [[AsyncImageLoader sharedLoader].cache objectForKey:imageURL];
     if (image)
     {
         self.image = image;
         return;
     }
-    super.imageURL = imageURL;
-    self.currentImageURL = imageURL;
     if (self.showActivityIndicator && !self.image && imageURL)
     {
         if (self.customActivityView) {
@@ -670,6 +670,15 @@ NSString *const AsyncImageErrorKey = @"error";
 	_activityIndicatorStyle = style;
 	[self.activityView removeFromSuperview];
 	self.activityView = nil;
+}
+
+-(void)setImage:(UIImage *)image forURL:(NSURL *)url {
+    if ([self.currentImageURL.absoluteString isEqualToString:url.absoluteString]) {
+        [self setImage:image];
+    }
+    else {
+        NSLog(@"Old url: %@ new url: %@", url, self.currentImageURL);
+    }
 }
 
 - (void)setImage:(UIImage *)image
